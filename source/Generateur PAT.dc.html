@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(0.97 0.01 90); }
+  a { color: oklch(0.5 0.1 220); }
+  a:hover { color: oklch(0.4 0.12 220); }
+  input, textarea, select { font-family: 'Nunito', sans-serif; }
+  details > summary { cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  input, textarea, select { transition: border-color .12s ease, box-shadow .12s ease; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: oklch(0.55 0.12 220) !important; box-shadow: 0 0 0 3px oklch(0.55 0.12 220 / 0.15); }
+  button { transition: filter .1s ease, transform .05s ease; }
+  button:active { transform: translateY(1px); }
+  button:disabled { opacity: .6; cursor: not-allowed !important; transform: none; }
+</style>
+<script type="text/javascript" src="./image-slot.js"></script>
+</helmet>
+
+<div style="font-family:'Nunito',sans-serif;color:oklch(0.25 0.02 260);max-width:1080px;margin:0 auto;padding:20px 24px 90px;">
+
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px;">
+    <div style="width:68px;height:68px;flex:none;">
+      <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="logo-ecole" shape="rounded" radius="12" placeholder="Logo" style="width:68px;height:68px" hint-size="68px,68px"></x-import>
+    </div>
+    <div style="flex:1;">
+      <h1 style="margin:0;font-size:22px;font-weight:800;color:oklch(0.4 0.08 220);">Plan d'appui temporaire</h1>
+      <p style="margin:2px 0 0;font-size:13px;color:oklch(0.5 0.02 260);">D'après les continuums langagiers du <a href="https://tpalf.ca" target="_blank" rel="noopener">TPALF</a>{{ headerSuffix }}</p>
+    </div>
+    <button onClick="{{ onQuickGenerate }}" disabled="{{ generating }}" style="border:1px solid oklch(0.5 0.1 220);background:white;color:oklch(0.45 0.1 220);border-radius:10px;padding:9px 16px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;" style-hover="background:oklch(0.96 0.03 220);">{{ generateLabel }}</button>
+  </div>
+
+  <div style="display:flex;gap:6px;margin-bottom:16px;">
+    <sc-for list="{{ steps }}" as="st" hint-placeholder-count="4">
+      <button onClick="{{ st.onClick }}" style="flex:1;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid {{ st.border }};background:{{ st.bg }};cursor:pointer;font-family:'Nunito',sans-serif;transition:background .12s ease,border-color .12s ease;" style-hover="border-color:oklch(0.6 0.1 220);">
+        <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:{{ st.numColor }};">Étape {{ st.num }} {{ st.doneMark }}</div>
+        <div style="font-size:13px;font-weight:700;color:{{ st.textColor }};margin-top:2px;">{{ st.label }}</div>
+      </button>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ showQuickSummary }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+      <sc-for list="{{ quickSummary }}" as="qs" hint-placeholder-count="3">
+        <div style="background:white;border:1px solid oklch(0.9 0.01 260);border-radius:10px;padding:7px 12px;font-size:12.5px;display:flex;gap:6px;align-items:center;">
+          <span style="font-weight:700;color:oklch(0.4 0.08 220);">{{ qs.label }}</span>
+          <span style="color:oklch(0.5 0.02 260);">{{ qs.palier }}</span>
+          <sc-if value="{{ qs.hasDefis }}" hint-placeholder-val="{{ false }}">
+            <span style="background:oklch(0.65 0.15 55);color:white;border-radius:999px;padding:1px 7px;font-size:10.5px;font-weight:800;">{{ qs.defisCount }} à cibler</span>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isStepEleve }}" hint-placeholder-val="{{ true }}">
+  <section style="background:white;border-radius:18px;padding:22px 24px;margin-bottom:20px;box-shadow:0 1px 3px oklch(0 0 0 / 0.06);">
+    <h2 style="margin:0 0 4px;font-size:16px;font-weight:700;color:oklch(0.4 0.08 220);">Renseignements sur l'élève</h2>
+    <p style="margin:0 0 16px;font-size:13px;color:oklch(0.5 0.02 260);">Ces informations apparaissent dans l'en-tête du document généré.</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:oklch(0.45 0.02 260);">Nom et prénom
+        <input name="nom" value="{{ student.nom }}" onChange="{{ onStudentChange }}" placeholder="Nom de l'élève" style="padding:9px 11px;border-radius:10px;border:1px solid oklch(0.88 0.01 260);font-size:14px;">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:oklch(0.45 0.02 260);">Année d'étude (bulletin)
+        <select name="annee" value="{{ student.annee }}" onChange="{{ onStudentChange }}" style="padding:9px 11px;border-radius:10px;border:1px solid oklch(0.88 0.01 260);font-size:14px;background:white;">
+          <option value="">Choisir l'année</option>
+          <sc-for list="{{ anneesScolaires }}" as="o" hint-placeholder-count="4"><option value="{{ o }}">{{ o }}</option></sc-for>
+        </select>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:oklch(0.45 0.02 260);">Date de la dernière révision
+        <input type="date" name="dateRevision" value="{{ student.dateRevision }}" onChange="{{ onStudentChange }}" style="padding:8px 11px;border-radius:10px;border:1px solid oklch(0.88 0.01 260);font-size:14px;font-family:inherit;">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:oklch(0.45 0.02 260);">Pays d'origine
+        <select name="paysOrigine" value="{{ student.paysOrigine }}" onChange="{{ onStudentChange }}" style="padding:9px 11px;border-radius:10px;border:1px solid oklch(0.88 0.01 260);font-size:14px;background:white;">
+          <option value="">Choisir le pays</option>
+          <sc-for list="{{ paysListe }}" as="o" hint-placeholder-count="4"><option value="{{ o }}">{{ o }}</option></sc-for>
+        </select>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:oklch(0.45 0.02 260);">Langue première / dominante
+        <select name="langueDominante" value="{{ student.langueDominante }}" onChange="{{ onStudentChange }}" style="padding:9px 11px;border-radius:10px;border:1px solid oklch(0.88 0.01 260);font-size:14px;background:white;">
+          <option value="">Choisir la langue</option>
+          <sc-for list="{{ languesListe }}" as="o" hint-placeholder-count="4"><option value="{{ o }}">{{ o }}</option></sc-for>
+        </select>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:oklch(0.45 0.02 260);">Année du TPALF (continuum à utiliser)
+        <select name="anneeTpalf" value="{{ anneeTpalf }}" onChange="{{ onAnneeTpalfChange }}" style="padding:9px 11px;border-radius:10px;border:1px solid oklch(0.88 0.01 260);font-size:14px;">
+          <sc-for list="{{ anneesOptions }}" as="ao" hint-placeholder-count="4">
+            <option value="{{ ao.id }}">{{ ao.label }}</option>
+          </sc-for>
+        </select>
+      </label>
+    </div>
+
+    <div style="margin-top:18px;">
+      <div style="font-size:13px;font-weight:700;color:oklch(0.45 0.02 260);margin-bottom:8px;">Composantes actives pour ce PAT</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <sc-for list="{{ composantesList }}" as="c" hint-placeholder-count="4">
+          <label style="display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:1px solid {{ c.border }};background:{{ c.tabBg }};cursor:pointer;">
+            <input type="checkbox" checked="{{ c.active }}" onChange="{{ c.onToggleActive }}" style="width:14px;height:14px;margin:0;">
+            <span style="font-size:13px;font-weight:700;color:{{ c.tabColor }};">{{ c.label }}</span>
+          </label>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+  </sc-if>
+
+  <sc-if value="{{ isStepDiagnostic }}" hint-placeholder-val="{{ false }}">
+  <section style="background:white;border-radius:18px;padding:22px 24px;margin-bottom:20px;box-shadow:0 1px 3px oklch(0 0 0 / 0.06);">
+    <div style="background:oklch(0.96 0.03 220);border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:12.5px;line-height:1.5;color:oklch(0.35 0.06 220);">
+      <strong>Comment faire :</strong> choisis une composante, puis coche uniquement ce que l'élève réussit déjà (✓ Réussi). Tout le reste devient automatiquement un défi à cibler, et le palier se calcule pour toi.
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+      <sc-for list="{{ composantesTabsDiag }}" as="c" hint-placeholder-count="4">
+        <button onClick="{{ c.onSelectTab }}" style="padding:9px 16px;border-radius:999px;border:1px solid oklch(0.85 0.01 260);cursor:pointer;font-size:13px;font-weight:700;font-family:'Nunito',sans-serif;background:{{ c.tabBg }};color:{{ c.tabColor }};display:inline-flex;align-items:center;gap:8px;white-space:nowrap;">
+          <span>{{ c.label }}</span>
+          <sc-if value="{{ c.hasDefis }}" hint-placeholder-val="{{ false }}">
+            <span style="background:{{ c.badgeBg }};color:{{ c.badgeColor }};border-radius:999px;padding:1px 7px;font-size:10.5px;font-weight:800;">{{ c.defisCount }}</span>
+          </sc-if>
+        </button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ hasActiveComposantes }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+      <div style="background:oklch(0.94 0.03 220);border-radius:12px;padding:8px 14px;font-size:13.5px;font-weight:700;color:oklch(0.4 0.08 220);">
+        Palier estimé : {{ palierInfo.label }}
+        <button onClick="{{ onTogglePalierInfo }}" style="border:none;background:oklch(0.5 0.1 220);color:white;border-radius:50%;width:18px;height:18px;font-size:11px;font-weight:800;cursor:pointer;margin-left:6px;">?</button>
+      </div>
+      <a href="{{ activeComposante.pdfLink }}" target="_blank" rel="noopener" style="font-size:13px;">📄 Continuum officiel ({{ activeComposante.label }}) — tpalf.ca</a>
+    </div>
+    <sc-if value="{{ showPalierInfo }}" hint-placeholder-val="{{ false }}">
+      <div style="background:oklch(0.97 0.02 90);border:1px solid oklch(0.88 0.03 90);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;line-height:1.6;white-space:pre-line;">{{ palierInfo.explanation }}</div>
+    </sc-if>
+
+    <sc-if value="{{ activeComposante.hasData }}" hint-placeholder-val="{{ true }}">
+      <sc-for list="{{ activeComposante.palierGroups }}" as="pg" hint-placeholder-count="5">
+        <details open="{{ pg.open }}" style="border:1px solid oklch(0.9 0.01 260);border-radius:14px;padding:10px 16px;margin-bottom:12px;">
+          <summary style="display:flex;align-items:center;gap:10px;list-style:none;flex-wrap:wrap;">
+            <span style="font-weight:800;font-size:14px;color:oklch(0.4 0.08 220);">{{ pg.palierLabel }}</span>
+            <span style="font-size:12px;color:oklch(0.55 0.02 260);">{{ pg.palierSub }}</span>
+            <div style="flex:1;min-width:80px;height:6px;background:oklch(0.92 0.01 260);border-radius:999px;overflow:hidden;max-width:160px;">
+              <div style="height:100%;width:{{ pg.pct }}%;background:{{ pg.barColor }};"></div>
+            </div>
+            <span style="font-size:12px;color:{{ pg.barColor }};font-weight:700;">{{ pg.ratioLabel }}</span>
+          </summary>
+          <div style="margin-top:10px;">
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <button onClick="{{ pg.onMarkAll }}" style="border:1px solid oklch(0.7 0.14 155);background:oklch(0.96 0.04 155);color:oklch(0.35 0.12 155);border-radius:8px;padding:5px 11px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">✓ Tout réussi</button>
+            <button onClick="{{ pg.onClearAll }}" style="border:1px solid oklch(0.85 0.01 260);background:white;color:oklch(0.45 0.02 260);border-radius:8px;padding:5px 11px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">Tout décocher</button>
+          </div>
+          <sc-for list="{{ pg.categories }}" as="cat" hint-placeholder-count="3">
+            <div style="margin-bottom:12px;padding-left:2px;">
+              <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:oklch(0.55 0.02 260);margin-bottom:6px;">{{ cat.category }}</div>
+              <sc-for list="{{ cat.items }}" as="it" hint-placeholder-count="2">
+                <label style="display:flex;align-items:flex-start;gap:10px;padding:6px 0;border-bottom:1px solid oklch(0.95 0 0);cursor:pointer;">
+                  <input type="checkbox" checked="{{ it.force }}" onChange="{{ it.onToggleForce }}" style="margin-top:3px;">
+                  <span style="flex:1;font-size:13.5px;line-height:1.4;color:{{ it.textColor }};">{{ it.text }}</span>
+                </label>
+              </sc-for>
+            </div>
+          </sc-for>
+          </div>
+        </details>
+      </sc-for>
+    </sc-if>
+
+    <sc-if value="{{ activeComposante.noData }}" hint-placeholder-val="{{ false }}">
+      <div style="background:oklch(0.97 0.02 90);border:1px dashed oklch(0.8 0.02 90);border-radius:12px;padding:16px;margin-bottom:10px;">
+        <p style="margin:0 0 10px;font-size:13.5px;">Aucun descripteur chargé pour <strong>{{ activeComposante.label }}</strong> à cette année d'étude. Colle les descripteurs depuis le <a href="{{ activeComposante.pdfLink }}" target="_blank" rel="noopener">PDF officiel</a> ci-dessous (un descripteur par ligne), par palier et catégorie.</p>
+        <sc-for list="{{ activeComposante.importGroups }}" as="ig" hint-placeholder-count="5">
+          <div style="border-top:1px solid oklch(0.92 0.01 260);padding-top:10px;margin-top:10px;">
+            <div style="font-weight:700;font-size:13px;margin-bottom:6px;">{{ ig.palierLabel }}</div>
+            <sc-for list="{{ ig.categories }}" as="icat" hint-placeholder-count="3">
+              <div style="margin-bottom:8px;">
+                <div style="font-size:12px;color:oklch(0.5 0.02 260);margin-bottom:4px;">{{ icat.category }}</div>
+                <div style="display:flex;gap:8px;">
+                  <textarea value="{{ icat.addValue }}" onChange="{{ icat.onAddValueChange }}" placeholder="Un descripteur par ligne…" rows="2" style="flex:1;padding:8px 10px;border-radius:10px;border:1px solid oklch(0.9 0.01 260);font-size:13px;resize:vertical;"></textarea>
+                  <button onClick="{{ icat.onAdd }}" style="border:none;background:oklch(0.5 0.1 220);color:white;border-radius:10px;padding:0 16px;font-weight:700;font-size:13px;cursor:pointer;">Ajouter</button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ hasNoActiveComposantes }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;padding:30px;color:oklch(0.55 0.02 260);font-size:13.5px;">Aucune composante active. Retourne à l'étape 1 pour en choisir au moins une.</div>
+    </sc-if>
+  </section>
+  </sc-if>
+
+  <sc-if value="{{ isStepPriorites }}" hint-placeholder-val="{{ false }}">
+  <section style="background:white;border-radius:18px;padding:22px 24px;margin-bottom:20px;box-shadow:0 1px 3px oklch(0 0 0 / 0.06);">
+    <h2 style="margin:0 0 4px;font-size:16px;font-weight:700;color:oklch(0.4 0.08 220);">Priorité et pistes d'intervention</h2>
+    <p style="margin:0 0 14px;font-size:13px;color:oklch(0.5 0.02 260);">Calculé automatiquement à partir des défis au palier estimé (seuil de maîtrise 80 %). Stratégies suggérées à adapter selon le contexte de la classe.</p>
+    <sc-if value="{{ hasPrioriteDetails }}" hint-placeholder-val="{{ true }}">
+      <sc-for list="{{ prioriteDetails }}" as="pd" hint-placeholder-count="2">
+        <div style="border:1px solid oklch(0.9 0.01 260);border-radius:14px;padding:14px 16px;margin-bottom:12px;">
+          <div style="font-size:14px;font-weight:800;color:oklch(0.4 0.08 220);margin-bottom:4px;">{{ pd.label }}</div>
+          <div style="font-size:12.5px;color:oklch(0.5 0.02 260);margin-bottom:10px;">Actuellement au <strong>{{ pd.curLabel }}</strong> — concentrer l'appui sur les catégories ci-dessous pour viser le <strong>{{ pd.nextLabel }}</strong>.</div>
+          <sc-if value="{{ pd.hasSynth }}" hint-placeholder-val="{{ false }}">
+            <details style="margin-bottom:10px;font-size:12.5px;line-height:1.55;color:oklch(0.35 0.02 260);">
+              <summary style="cursor:pointer;font-weight:700;color:oklch(0.45 0.08 220);">Synthèse des paliers (TPALF)</summary>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:8px;">
+                <div style="background:oklch(0.97 0.01 260);border-radius:10px;padding:10px 12px;"><div style="font-weight:700;margin-bottom:4px;">{{ pd.curLabel }} (actuel)</div>{{ pd.curSynth }}</div>
+                <div style="background:oklch(0.96 0.03 220);border-radius:10px;padding:10px 12px;"><div style="font-weight:700;margin-bottom:4px;">{{ pd.nextLabel }} (visé)</div>{{ pd.nextSynth }}</div>
+              </div>
+            </details>
+          </sc-if>
+          <sc-for list="{{ pd.categories }}" as="cat" hint-placeholder-count="2">
+            <div style="background:oklch(0.97 0.015 90);border-radius:10px;padding:10px 12px;margin-bottom:8px;">
+              <div style="font-size:12.5px;font-weight:700;color:oklch(0.35 0.02 260);margin-bottom:2px;">{{ cat.category }}</div>
+              <div style="font-size:12.5px;color:oklch(0.45 0.02 260);margin-bottom:6px;">{{ cat.objectif }}</div>
+              <sc-for list="{{ cat.strategies }}" as="strat" hint-placeholder-count="2">
+                <div style="font-size:12.5px;line-height:1.5;padding-left:14px;position:relative;">
+                  <span style="position:absolute;left:0;">•</span> {{ strat }}
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </sc-if>
+    <sc-if value="{{ hasNoPriorite }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;padding:20px;color:oklch(0.55 0.02 260);font-size:13.5px;">Aucun défi identifié pour l'instant — l'élève maîtrise le palier estimé sur toutes les composantes actives.</div>
+    </sc-if>
+  </section>
+
+  <section style="background:white;border-radius:18px;padding:22px 24px;margin-bottom:20px;box-shadow:0 1px 3px oklch(0 0 0 / 0.06);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h2 style="margin:0;font-size:16px;font-weight:700;color:oklch(0.4 0.08 220);">Attentes ciblées par période</h2>
+      <button onClick="{{ onAddPeriode }}" style="border:none;background:oklch(0.6 0.14 55);color:white;border-radius:10px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;">+ Ajouter une période</button>
+    </div>
+    <sc-if value="{{ hasNoPeriodes }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;padding:20px;color:oklch(0.55 0.02 260);font-size:13.5px;">Aucune période pour l'instant — ajoute une période pour choisir les attentes à communiquer aux parents.</div>
+    </sc-if>
+    <sc-for list="{{ periodes }}" as="per" hint-placeholder-count="1">
+      <div style="border:1px solid oklch(0.9 0.01 260);border-radius:14px;padding:14px 16px;margin-bottom:12px;">
+        <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+          <input value="{{ per.dates }}" onChange="{{ per.onDatesChange }}" placeholder="p. ex. Novembre à janvier" style="flex:1;min-width:180px;padding:9px 11px;border-radius:10px;border:1px solid oklch(0.88 0.01 260);font-size:14px;">
+          <select value="{{ per.composanteId }}" onChange="{{ per.onComposanteChange }}" style="padding:9px 11px;border-radius:10px;border:1px solid oklch(0.88 0.01 260);font-size:14px;">
+            <sc-for list="{{ per.composanteOptions }}" as="opt" hint-placeholder-count="3">
+              <option value="{{ opt.id }}">{{ opt.label }}</option>
+            </sc-for>
+          </select>
+          <button onClick="{{ per.onRemove }}" style="border:none;background:none;color:oklch(0.6 0.02 260);cursor:pointer;font-size:13px;">Retirer la période ✕</button>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:oklch(0.55 0.02 260);margin-bottom:6px;">Attentes du prochain palier pour cette composante</div>
+        <sc-if value="{{ per.hasItems }}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{ per.availableItems }}" as="ai" hint-placeholder-count="2">
+            <label style="display:flex;gap:8px;align-items:flex-start;padding:4px 0;font-size:13.5px;cursor:pointer;">
+              <input type="checkbox" checked="{{ ai.checked }}" onChange="{{ ai.onToggle }}"> <span>{{ ai.text }}</span>
+            </label>
+          </sc-for>
+        </sc-if>
+        <sc-if value="{{ per.hasNoItems }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13px;color:oklch(0.6 0.02 260);">Aucune attente disponible pour cette composante à ce palier.</div>
+        </sc-if>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:oklch(0.45 0.02 260);margin-top:10px;">Commentaires / preuves d'apprentissage
+          <textarea value="{{ per.commentaires }}" onChange="{{ per.onCommentairesChange }}" rows="2" style="padding:9px 11px;border-radius:10px;border:1px solid oklch(0.88 0.01 260);font-size:14px;resize:vertical;"></textarea>
+        </label>
+      </div>
+    </sc-for>
+  </section>
+  </sc-if>
+
+  <sc-if value="{{ isStepCommunication }}" hint-placeholder-val="{{ false }}">
+  <section style="background:white;border-radius:18px;padding:22px 24px;margin-bottom:20px;box-shadow:0 1px 3px oklch(0 0 0 / 0.06);">
+    <h2 style="margin:0 0 14px;font-size:16px;font-weight:700;color:oklch(0.4 0.08 220);">Communication du rendement</h2>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div style="font-size:13px;font-weight:700;color:oklch(0.45 0.02 260);">Présentation du plan / Bulletins de progrès</div>
+      <button onClick="{{ onAddBulletin }}" style="border:none;background:oklch(0.5 0.1 220);color:white;border-radius:10px;padding:6px 12px;font-weight:700;font-size:12px;cursor:pointer;">+ Ajouter</button>
+    </div>
+    <sc-for list="{{ bulletins }}" as="b" hint-placeholder-count="2">
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input value="{{ b.label }}" onChange="{{ b.onLabelChange }}" style="flex:1;padding:8px 11px;border-radius:10px;border:1px solid oklch(0.88 0.01 260);font-size:14px;">
+        <button onClick="{{ b.onRemove }}" style="border:none;background:none;color:oklch(0.6 0.02 260);cursor:pointer;">✕</button>
+      </div>
+    </sc-for>
+    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:oklch(0.45 0.02 260);margin:14px 0;">Résumé de la rencontre
+      <textarea value="{{ resume }}" onChange="{{ onResumeChange }}" rows="3" style="padding:10px 12px;border-radius:10px;border:1px solid oklch(0.88 0.01 260);font-size:14px;resize:vertical;"></textarea>
+    </label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:oklch(0.45 0.02 260);">Nom et prénom du parent ou tuteur
+        <input value="{{ parentNom }}" onChange="{{ onParentNomChange }}" style="padding:9px 11px;border-radius:10px;border:1px solid oklch(0.88 0.01 260);font-size:14px;">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:oklch(0.45 0.02 260);">Date
+        <input type="date" value="{{ parentDate }}" onChange="{{ onParentDateChange }}" style="padding:9px 11px;border-radius:10px;border:1px solid oklch(0.88 0.01 260);font-size:14px;">
+      </label>
+    </div>
+  </section>
+
+  <div style="background:linear-gradient(135deg, oklch(0.4 0.09 220), oklch(0.48 0.1 230));border-radius:18px;padding:22px 24px;color:white;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+    <div>
+      <div style="font-size:15px;font-weight:800;">Prêt à générer le PAT</div>
+      <div style="font-size:12.5px;opacity:0.85;margin-top:2px;">Le fichier .docx inclut l'en-tête, les forces/défis, les priorités et les attentes ciblées.</div>
+    </div>
+    <button onClick="{{ onGenerate }}" disabled="{{ generating }}" style="border:none;background:white;color:oklch(0.4 0.09 220);border-radius:12px;padding:13px 26px;font-weight:800;font-size:15px;cursor:pointer;white-space:nowrap;" style-hover="filter:brightness(0.96);">{{ generateLabelLong }}</button>
+  </div>
+  </sc-if>
+
+  <div style="display:flex;justify-content:space-between;margin-top:20px;">
+    <sc-if value="{{ hasPrevStep }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ onPrevStep }}" style="border:1px solid oklch(0.85 0.01 260);background:white;color:oklch(0.45 0.02 260);border-radius:12px;padding:11px 20px;font-weight:700;font-size:14px;cursor:pointer;">← Précédent</button>
+    </sc-if>
+    <sc-if value="{{ hasNoPrevStep }}" hint-placeholder-val="{{ true }}"><span></span></sc-if>
+    <div style="display:flex;gap:10px;">
+      <button onClick="{{ onReset }}" style="border:1px solid oklch(0.85 0.01 260);background:white;color:oklch(0.6 0.05 30);border-radius:12px;padding:11px 18px;font-weight:700;font-size:13px;cursor:pointer;">Réinitialiser</button>
+      <sc-if value="{{ hasNextStep }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ onNextStep }}" style="border:none;background:oklch(0.45 0.1 220);color:white;border-radius:12px;padding:11px 24px;font-weight:800;font-size:14px;cursor:pointer;" style-hover="filter:brightness(1.08);">Suivant →</button>
+      </sc-if>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const PALIER_ORDER = ['eveil', 1, 2, 3, 4];
+const STEPS = [
+  { id: 'eleve', label: 'Élève' },
+  { id: 'diagnostic', label: 'Diagnostic TPALF' },
+  { id: 'priorites', label: 'Priorités & attentes' },
+  { id: 'communication', label: 'Communication & envoi' },
+];
+
+const ANNEES_SCOLAIRES = ["1re année","2e année","3e année","4e année","5e année","6e année","7e année","8e année","9e année","10e année","11e année","12e année"];
+const PAYS = ["Afghanistan","Afrique du Sud","Albanie","Algérie","Allemagne","Andorre","Angola","Antigua-et-Barbuda","Arabie saoudite","Argentine","Arménie","Australie","Autriche","Azerbaïdjan","Bahamas","Bahreïn","Bangladesh","Barbade","Belgique","Belize","Bénin","Bhoutan","Biélorussie","Birmanie (Myanmar)","Bolivie","Bosnie-Herzégovine","Botswana","Brésil","Brunei","Bulgarie","Burkina Faso","Burundi","Cambodge","Cameroun","Canada","Cap-Vert","Centrafrique","Chili","Chine","Chypre","Colombie","Comores","Congo (Brazzaville)","Congo (RDC)","Corée du Nord","Corée du Sud","Costa Rica","Côte d'Ivoire","Croatie","Cuba","Danemark","Djibouti","Dominique","Égypte","Émirats arabes unis","Équateur","Érythrée","Espagne","Estonie","Eswatini","États-Unis","Éthiopie","Fidji","Finlande","France","Gabon","Gambie","Géorgie","Ghana","Grèce","Grenade","Guatemala","Guinée","Guinée équatoriale","Guinée-Bissau","Guyana","Haïti","Honduras","Hongrie","Îles Marshall","Îles Salomon","Inde","Indonésie","Irak","Iran","Irlande","Islande","Israël","Italie","Jamaïque","Japon","Jordanie","Kazakhstan","Kenya","Kirghizistan","Kiribati","Kosovo","Koweït","Laos","Lesotho","Lettonie","Liban","Liberia","Libye","Liechtenstein","Lituanie","Luxembourg","Macédoine du Nord","Madagascar","Malaisie","Malawi","Maldives","Mali","Malte","Maroc","Maurice","Mauritanie","Mexique","Micronésie","Moldavie","Monaco","Mongolie","Monténégro","Mozambique","Namibie","Nauru","Népal","Nicaragua","Niger","Nigeria","Norvège","Nouvelle-Zélande","Oman","Ouganda","Ouzbékistan","Pakistan","Palaos","Palestine","Panama","Papouasie-Nouvelle-Guinée","Paraguay","Pays-Bas","Pérou","Philippines","Pologne","Portugal","Qatar","République dominicaine","République tchèque","Roumanie","Royaume-Uni","Russie","Rwanda","Saint-Christophe-et-Niévès","Sainte-Lucie","Saint-Marin","Saint-Vincent-et-les-Grenadines","Salvador","Samoa","Sao Tomé-et-Principe","Sénégal","Serbie","Seychelles","Sierra Leone","Singapour","Slovaquie","Slovénie","Somalie","Soudan","Soudan du Sud","Sri Lanka","Suède","Suisse","Suriname","Syrie","Tadjikistan","Taïwan","Tanzanie","Tchad","Thaïlande","Timor oriental","Togo","Tonga","Trinité-et-Tobago","Tunisie","Turkménistan","Turquie","Tuvalu","Ukraine","Uruguay","Vanuatu","Vatican","Venezuela","Viêt Nam","Yémen","Zambie","Zimbabwe","Autre"];
+const LANGUES = ["Français","Anglais","Arabe","Arabe (Maghreb / darija)","Arabe (Levant)","Arabe (Égypte)","Espagnol","Portugais","Créole haïtien","Créole antillais (Guadeloupe, Martinique)","Créole guyanais","Créole réunionnais","Créole mauricien","Créole seychellois","Créole cap-verdien","Créole jamaïcain (patois)","Créole de Sierra Leone (krio)","Pidgin nigérian","Mandarin","Cantonais","Hakka","Min (hokkien, teochew)","Tibétain","Ouïghour","Hindi","Ourdou","Pendjabi","Bengali","Gujarati","Marathi","Tamoul","Télougou","Malayalam","Kannada","Cingalais","Népalais","Persan (farsi)","Dari","Pachto","Tadjik","Kurde (kurmandji)","Kurde (sorani)","Turc","Azéri","Ouzbek","Kazakh","Arménien","Géorgien","Hébreu","Araméen / assyrien","Amharique","Tigrigna","Oromo","Somali","Afar","Kiswahili","Kinyarwanda","Kirundi","Luganda","Lingala","Kikongo","Tshiluba","Swahili congolais","Sango","Wolof","Peul (pulaar, fulfulde)","Mandingue","Bambara","Dioula","Soninké","Mooré","Haoussa","Yoruba","Igbo","Twi / akan","Éwé","Fon","Bassa","Ewondo","Douala","Malgache","Shona","Zoulou","Xhosa","Sesotho","Setswana","Tamazight (berbère, kabyle)","Russe","Ukrainien","Biélorusse","Polonais","Tchèque","Slovaque","Hongrois","Roumain","Moldave","Bulgare","Serbe","Croate","Bosniaque","Macédonien","Slovène","Albanais","Grec","Italien","Allemand","Néerlandais","Suédois","Norvégien","Danois","Finnois","Estonien","Letton","Lituanien","Romani","Tagalog (filipino)","Cebuano","Ilocano","Vietnamien","Khmer","Lao","Thaï","Birman","Karen","Malais","Indonésien","Coréen","Japonais","Mongol","Langue des signes québécoise (LSQ)","American Sign Language (ASL)","Cri","Ojibwé","Inuktitut","Mohawk","Innu","Mi'kmaq","Autre langue autochtone","Autre"];
+class Component extends DCLogic {
+  state = {
+    step: 'eleve',
+    student: { nom: '', annee: '', dateRevision: '', paysOrigine: '', langueDominante: '' },
+    anneeTpalf: 'primaire',
+    activeComposantes: { communication_orale: true, lecture: true, ecriture: true, personnalise: false },
+    tab: 'communication_orale',
+    bank: [],
+    seeded: {},
+    sel: {},
+    addValues: {},
+    showPalierInfo: false,
+    periodes: [],
+    periodeItemSel: {},
+    bulletins: [{ id: 'b1', label: 'Bulletin 1' }, { id: 'b2', label: 'Bulletin 2' }],
+    resume: '',
+    parentNom: '',
+    parentDate: '',
+    generating: false,
+    seedVersion: 'tpalf-officiel-v2',
+  };
+
+  async componentDidMount() {
+    this.data = await import('./tpalf-data.js');
+    this.docx = await import('./docx-builder.js');
+    const [primaire, moyen, intermediaire, secondaire, strategiesModule] = await Promise.all([
+      import('./tpalf-seed-primaire.js'),
+      import('./tpalf-seed-moyen.js'),
+      import('./tpalf-seed-intermediaire.js'),
+      import('./tpalf-seed-secondaire.js'),
+      import('./strategies.js'),
+    ]);
+    this.strategiesModule = strategiesModule;
+    this.seedByAnnee = {
+      primaire: primaire.SEED_PRIMAIRE,
+      moyen: moyen.SEED_MOYEN,
+      intermediaire: intermediaire.SEED_INTERMEDIAIRE,
+      secondaire: secondaire.SEED_SECONDAIRE,
+    };
+    this.synthByAnnee = {
+      primaire: primaire.SYNTHESES_PRIMAIRE, moyen: moyen.SYNTHESES_MOYEN,
+      intermediaire: intermediaire.SYNTHESES_INTERMEDIAIRE, secondaire: secondaire.SYNTHESES_SECONDAIRE,
+    };
+    let restored = null;
+    try {
+      const raw = localStorage.getItem('pat_tool_state_v3');
+      if (raw) restored = JSON.parse(raw);
+    } catch (e) {}
+    const next = restored || {};
+    if (next.bank) {
+      // Migration: strip pre-année-scoped seed ids (old format `seed-{composanteId}-...`,
+      // superseded by `seed-{anneeKey}-{composanteId}-...`) so stale entries from before
+      // multi-année seeding don't linger alongside their re-seeded replacements.
+      const OLD_PREFIXES = ['seed-communication_orale-', 'seed-lecture-', 'seed-ecriture-', 'seed-personnalise-'];
+      next.bank = next.bank.filter(b => !OLD_PREFIXES.some(pre => String(b.id).startsWith(pre)));
+      // Banque officielle TPALF v2 (texte exact des continuums) : on retire les anciens descripteurs
+      // préchargés (paraphrasés) et les sélections qui s'y rattachaient; les ajouts personnels restent.
+      if (next.seedVersion !== 'tpalf-officiel-v2') {
+        const stale = new Set(next.bank.filter(b => String(b.id).startsWith('seed-')).map(b => b.id));
+        next.bank = next.bank.filter(b => !stale.has(b.id));
+        if (next.sel) next.sel = Object.fromEntries(Object.entries(next.sel).filter(([k]) => !stale.has(k)));
+        next.seeded = {};
+      }
+      next.seedVersion = 'tpalf-officiel-v2';
+      const seen = new Set();
+      next.bank = next.bank.filter(b => {
+        const key = `${b.annee || 'primaire'}|${b.composanteId}|${b.palierId}|${b.category}|${b.text}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+    this.setState(next, () => this.ensureSeed());
+  }
+
+  persist(next) {
+    this.setState(next, () => {
+      try {
+        const { seeded, generating, ...toSave } = this.state;
+        localStorage.setItem('pat_tool_state_v3', JSON.stringify(toSave));
+      } catch (e) {}
+    });
+  }
+
+  uid() { return Math.random().toString(36).slice(2, 10); }
+
+  // Idempotent by design (content-keyed dedup) rather than gated by a one-time "seeded"
+  // flag — self-heals any previously-persisted bank that is missing items (e.g. from an
+  // earlier dedup bug) instead of permanently skipping an "already seeded" année.
+  ensureSeed() {
+    if (!this.seedByAnnee || this._seedDone) return;
+    this._seedDone = true;
+    const newItems = [];
+    Object.keys(this.seedByAnnee).forEach(anneeKey => {
+      const SEED = this.seedByAnnee[anneeKey];
+      Object.keys(SEED).forEach(composanteId => {
+        Object.keys(SEED[composanteId]).forEach(palierId => {
+          const cats = SEED[composanteId][palierId];
+          Object.keys(cats).forEach(category => {
+            cats[category].forEach((text, idx) => {
+              newItems.push({ id: `seed-${anneeKey}-${composanteId}-${palierId}-${category}-${idx}`.replace(/\s+/g, '_'), annee: anneeKey, composanteId, palierId, category, text });
+            });
+          });
+        });
+      });
+    });
+    const merged = [...this.state.bank, ...newItems];
+    const seen = new Set();
+    const deduped = merged.filter(b => {
+      const key = `${b.annee || 'primaire'}|${b.composanteId}|${b.palierId}|${b.category}|${b.text}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    const allSeeded = { primaire: true, moyen: true, intermediaire: true, secondaire: true };
+    if (deduped.length !== this.state.bank.length) this.persist({ bank: deduped, seeded: allSeeded });
+    else if (!this.state.seeded.primaire || !this.state.seeded.moyen || !this.state.seeded.intermediaire || !this.state.seeded.secondaire) this.persist({ seeded: allSeeded });
+  }
+
+  synthOf(cid, palierId) {
+    const t = this.synthByAnnee && this.synthByAnnee[this.state.anneeTpalf];
+    return (t && t[cid] && t[cid].synthese && t[cid].synthese[String(palierId)]) || '';
+  }
+
+  fmtDate(v) {
+    if (!v) return '';
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+    if (!m) return v;
+    const mois = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    return `${parseInt(m[3],10)} ${mois[parseInt(m[2],10)-1]} ${m[1]}`;
+  }
+
+  handleStudentChange = (e) => {
+    this.persist({ student: { ...this.state.student, [e.target.name]: e.target.value } });
+  };
+
+  handleAnneeTpalfChange = (e) => this.persist({ anneeTpalf: e.target.value });
+
+  toggleComposanteActive(id) {
+    const nextActive = { ...this.state.activeComposantes, [id]: !this.state.activeComposantes[id] };
+    let tab = this.state.tab;
+    if (!nextActive[tab]) {
+      const firstActive = Object.keys(nextActive).find(k => nextActive[k]);
+      if (firstActive) tab = firstActive;
+    }
+    this.persist({ activeComposantes: nextActive, tab });
+  }
+
+  selectTab(id) { this.persist({ tab: id, showPalierInfo: false }); }
+
+  goStep(id) { this.persist({ step: id }); }
+  nextStep() {
+    const idx = STEPS.findIndex(s => s.id === this.state.step);
+    if (idx < STEPS.length - 1) this.persist({ step: STEPS[idx + 1].id });
+  }
+  prevStep() {
+    const idx = STEPS.findIndex(s => s.id === this.state.step);
+    if (idx > 0) this.persist({ step: STEPS[idx - 1].id });
+  }
+
+  addValueKey(anneeTpalf, composanteId, palierId, category) { return `${anneeTpalf}|${composanteId}|${palierId}|${category}`; }
+
+  handleAddValueChange(key, val) {
+    this.persist({ addValues: { ...this.state.addValues, [key]: val } });
+  }
+
+  addDescriptors(palierId, category) {
+    const key = this.addValueKey(this.state.anneeTpalf, this.state.tab, palierId, category);
+    const raw = this.state.addValues[key] || '';
+    const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return;
+    const newItems = lines.map(text => ({ id: this.uid(), annee: this.state.anneeTpalf, composanteId: this.state.tab, palierId, category, text }));
+    this.persist({ bank: [...this.state.bank, ...newItems], addValues: { ...this.state.addValues, [key]: '' } });
+  }
+
+  toggleForce(id) {
+    const cur = this.state.sel[id] || {};
+    this.persist({ sel: { ...this.state.sel, [id]: { ...cur, force: !cur.force } } });
+  }
+
+  markAllInPalier(composanteId, palierId, value) {
+    const ids = this.state.bank.filter(b => b.composanteId === composanteId && (b.annee || 'primaire') === this.state.anneeTpalf && String(b.palierId) === String(palierId)).map(b => b.id);
+    const sel = { ...this.state.sel };
+    ids.forEach(id => { sel[id] = { ...sel[id], force: value }; });
+    this.persist({ sel });
+  }
+
+  togglePalierInfo() { this.persist({ showPalierInfo: !this.state.showPalierInfo }); }
+
+  addPeriode() {
+    const activeIds = Object.keys(this.state.activeComposantes).filter(k => this.state.activeComposantes[k]);
+    this.persist({ periodes: [...this.state.periodes, { id: this.uid(), dates: '', composanteId: activeIds[0] || '', commentaires: '' }] });
+  }
+
+  updatePeriode(id, field, value) {
+    this.persist({ periodes: this.state.periodes.map(p => p.id === id ? { ...p, [field]: value } : p) });
+  }
+
+  removePeriode(id) {
+    this.persist({ periodes: this.state.periodes.filter(p => p.id !== id) });
+  }
+
+  togglePeriodeItem(periodeId, itemId) {
+    const key = `${periodeId}|${itemId}`;
+    this.persist({ periodeItemSel: { ...this.state.periodeItemSel, [key]: !this.state.periodeItemSel[key] } });
+  }
+
+  addBulletin() {
+    this.persist({ bulletins: [...this.state.bulletins, { id: this.uid(), label: `Bulletin ${this.state.bulletins.length + 1}` }] });
+  }
+
+  updateBulletin(id, value) {
+    this.persist({ bulletins: this.state.bulletins.map(b => b.id === id ? { ...b, label: value } : b) });
+  }
+
+  removeBulletin(id) {
+    this.persist({ bulletins: this.state.bulletins.filter(b => b.id !== id) });
+  }
+
+  reset() {
+    localStorage.removeItem('pat_tool_state_v3');
+    // Bug fix: ensureSeed() is guarded by this._seedDone so it only ever seeds once;
+    // without clearing that flag here, wiping `bank` on reset left it permanently
+    // empty (no descriptors, so "Attentes ciblées" etc. had nothing to show).
+    this._seedDone = false;
+    this.setState({
+      step: 'eleve',
+      student: { nom: '', annee: '', dateRevision: '', paysOrigine: '', langueDominante: '' },
+      anneeTpalf: 'primaire',
+      activeComposantes: { communication_orale: true, lecture: true, ecriture: true, personnalise: false },
+      tab: 'communication_orale', bank: [], seeded: {}, sel: {}, addValues: {}, showPalierInfo: false,
+      periodes: [], periodeItemSel: {},
+      bulletins: [{ id: 'b1', label: 'Bulletin 1' }, { id: 'b2', label: 'Bulletin 2' }], resume: '', parentNom: '', parentDate: '',
+    }, () => this.ensureSeed());
+  }
+
+  bankFor(composanteId, anneeTpalf) {
+    return this.state.bank.filter(b => b.composanteId === composanteId && (b.annee || 'primaire') === anneeTpalf);
+  }
+
+  computePalier(items) {
+    const ratios = {};
+    PALIER_ORDER.forEach(pid => {
+      const its = items.filter(i => String(i.palierId) === String(pid));
+      if (!its.length) { ratios[pid] = null; return; }
+      const forced = its.filter(i => this.state.sel[i.id]?.force).length;
+      ratios[pid] = { forced, total: its.length, ratio: forced / its.length };
+    });
+    // Seuil de maîtrise à 80 % : maîtriser un palier fait AVANCER au palier suivant
+    // (un élève qui maîtrise 80 % de l'Éveil est rendu au Palier 1, pas encore à
+    // l'Éveil ; 80 % du Palier 1 le rend au Palier 2, etc.). On cherche le dernier
+    // palier maîtrisé de façon consécutive depuis le début, puis on avance d'un cran.
+    let lastMasteredIdx = -1;
+    for (let idx = 0; idx < PALIER_ORDER.length; idx++) {
+      const pid = PALIER_ORDER[idx];
+      const r = ratios[pid];
+      // L'Éveil ne s'applique pas à tous les élèves (p. ex. un élève de 7e année déjà
+      // alphabétisé dans une autre langue) : si rien n'y a jamais été coché, on ne le
+      // traite pas comme "non maîtrisé" (ce qui bloquerait la progression pour
+      // toujours) mais comme "non pertinent", et on continue d'évaluer les paliers
+      // suivants sur leurs propres mérites.
+      if (pid === 'eveil' && (!r || r.forced === 0)) continue;
+      if (r && r.ratio >= 0.8) lastMasteredIdx = idx; else break;
+    }
+    const nextIdx = Math.min(lastMasteredIdx + 1, PALIER_ORDER.length - 1);
+    return { computed: PALIER_ORDER[nextIdx], ratios };
+  }
+
+  palierLabelOf(id, PALIERS) {
+    const pl = PALIERS.find(p => String(p.id) === String(id));
+    return pl ? pl.label : id;
+  }
+
+  defisFor(composanteId) {
+    const items = this.bankFor(composanteId, this.state.anneeTpalf);
+    const { computed } = this.computePalier(items);
+    return items.filter(i => String(i.palierId) === String(computed) && !this.state.sel[i.id]?.force);
+  }
+
+  // Next palier after the one currently attained — null when already at the top (Palier 4).
+  nextPalierId(computed) {
+    const idx = PALIER_ORDER.findIndex(p => String(p) === String(computed));
+    if (idx < 0 || idx >= PALIER_ORDER.length - 1) return null;
+    return PALIER_ORDER[idx + 1];
+  }
+
+  // Les attentes ciblées reflètent le PROCHAIN palier du continuum (l'objectif de
+  // croissance), pas seulement les descripteurs non cochés au palier actuel — sinon
+  // un élève qui maîtrise déjà tout son palier actuel se retrouverait sans attentes.
+  attentesFor(composanteId) {
+    const items = this.bankFor(composanteId, this.state.anneeTpalf);
+    const { computed } = this.computePalier(items);
+    const nextId = this.nextPalierId(computed);
+    if (nextId === null) return this.defisFor(composanteId);
+    const next = items.filter(i => String(i.palierId) === String(nextId));
+    return next.length ? next : this.defisFor(composanteId);
+  }
+
+  async fetchLogoPng() {
+    try {
+      const res = await fetch('./.image-slots.state.json');
+      if (!res.ok) return null;
+      const json = await res.json();
+      const entry = json['logo-ecole'];
+      const url = typeof entry === 'string' ? entry : entry && entry.u;
+      if (!url || !/^data:image\//.test(url)) return null;
+      const img = await new Promise((resolve, reject) => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.onerror = reject;
+        im.src = url;
+      });
+      const size = 120;
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const scale = Math.max(size / img.width, size / img.height);
+      const w = img.width * scale, h = img.height * scale;
+      ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+      const base64 = canvas.toDataURL('image/png').split(',')[1];
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return bytes;
+    } catch (e) { return null; }
+  }
+
+  async generateDocx() {
+    if (!this.data || !this.docx) return;
+    const { COMPOSANTES, PALIERS } = this.data;
+    const { p, heading, table, bulletList, imageRun, footerPageNumberXml, buildDocxBlob, downloadBlob } = this.docx;
+    const s = this.state;
+    const activeIds = COMPOSANTES.filter(c => s.activeComposantes[c.id]).map(c => c.id);
+    const logoBytes = await this.fetchLogoPng();
+
+    let body = '';
+    body += table([[{ xml: p("Plan d'appui temporaire", { bold: true, size: 24, color: 'FFFFFF', spacingAfter: 20 }) + p('Francisation — d\'après les continuums langagiers du TPALF', { bold: true, size: 11, color: 'DCE8F5', spacingAfter: 0 }), shade: '2E5C88' }]], { colWidths: [10440], borders: false, zebra: false });
+    body += p('', { spacingAfter: 160 });
+    body += table([
+      ['Nom et prénom', s.student.nom || '—', "Année d'étude", s.student.annee || '—'],
+      ['Date de la dernière révision', this.fmtDate(s.student.dateRevision) || '—', "Pays d'origine", s.student.paysOrigine || '—'],
+      ["Langue première / dominante", s.student.langueDominante || '—', '', ''],
+    ], { colWidths: [1900, 3320, 1900, 3320] });
+    body += p('', { spacingAfter: 160 });
+
+    body += heading('Éveil / Paliers — Forces et défis');
+    const forceRows = [['Composante', 'Palier atteint', "Forces (ce que l'élève réussit)", 'Défis (à cibler)']];
+    const perComposanteCompute = {};
+    activeIds.forEach(cid => {
+      const comp = COMPOSANTES.find(c => c.id === cid);
+      const items = this.bankFor(cid, s.anneeTpalf);
+      const { computed } = this.computePalier(items);
+      perComposanteCompute[cid] = computed;
+      // Forces = descripteurs cochés réussi au palier ACTUEL, plus ceux du dernier
+      // palier maîtrisé (celui qui justifie d'avoir atteint le palier actuel) — pas
+      // tout l'historique cumulatif des paliers inférieurs, dont le ton "manque/erreur"
+      // lu hors contexte donnait l'impression d'une liste de défis. Sans ce repli sur
+      // le dernier palier maîtrisé, la colonne restait souvent vide (rien encore coché
+      // au palier tout juste atteint).
+      const computedIdx = PALIER_ORDER.findIndex(p => String(p) === String(computed));
+      let forces = items.filter(i => String(i.palierId) === String(computed) && s.sel[i.id]?.force);
+      // Repli progressif : si rien n'est coché au palier actuel (tout juste atteint),
+      // on remonte vers le dernier palier inférieur qui contient des réussites
+      // concrètes, pour ne jamais laisser la colonne Forces vide alors que l'élève a
+      // été évalué plus bas dans le continuum.
+      if (!forces.length) {
+        for (let idx = computedIdx - 1; idx >= 0; idx--) {
+          const atThisPalier = items.filter(i => String(i.palierId) === String(PALIER_ORDER[idx]) && s.sel[i.id]?.force);
+          if (atThisPalier.length) { forces = atThisPalier; break; }
+        }
+      }
+      const defis = items.filter(i => String(i.palierId) === String(computed) && !s.sel[i.id]?.force);
+      const palierLabel = this.palierLabelOf(computed, PALIERS);
+      forceRows.push([
+        { xml: p(comp.label, { bold: true, size: 10.5, spacingAfter: 0 }) },
+        { xml: p(palierLabel, { size: 10.5, spacingAfter: 0 }) },
+        { xml: bulletList(forces.map(i => i.text)) },
+        { xml: bulletList(defis.map(i => i.text)) },
+      ]);
+    });
+    body += table(forceRows, { header: true, colWidths: [1800, 1400, 3620, 3620] });
+    body += p('', { spacingAfter: 160 });
+
+    body += heading('Priorité et composantes à cibler');
+    const prioriteTxt = activeIds.filter(cid => {
+      const items = this.bankFor(cid, s.anneeTpalf);
+      const computed = perComposanteCompute[cid];
+      return items.some(i => String(i.palierId) === String(computed) && !s.sel[i.id]?.force);
+    }).map(cid => COMPOSANTES.find(c => c.id === cid).label).join(', ') || '—';
+    body += p('Priorité : ' + prioriteTxt, { bold: true, size: 11, spacingAfter: 100 });
+    const catRows = [['Composante', 'Catégories à cibler', "Pistes d'intervention suggérées"]];
+    activeIds.forEach(cid => {
+      const comp = COMPOSANTES.find(c => c.id === cid);
+      const items = this.bankFor(cid, s.anneeTpalf);
+      const computed = perComposanteCompute[cid];
+      const cats = Array.from(new Set(items.filter(i => String(i.palierId) === String(computed) && !s.sel[i.id]?.force).map(i => i.category)));
+      const stratLines = cats.flatMap(cat => this.strategiesModule.getStrategyInfo(cat, s.anneeTpalf).strategies.slice(0, 1));
+      catRows.push([
+        { xml: p(comp.label, { bold: true, size: 10.5, spacingAfter: 0 }) },
+        { xml: p(cats.length ? cats.join(', ') : '—', { size: 10.5, spacingAfter: 0 }) },
+        { xml: bulletList(stratLines) },
+      ]);
+    });
+    body += table(catRows, { header: true, colWidths: [1700, 2900, 5840] });
+    body += p('', { spacingAfter: 120 });
+    const synthBlocks = activeIds.map(cid => {
+      const comp = COMPOSANTES.find(c => c.id === cid);
+      const txt = this.synthOf(cid, perComposanteCompute[cid]);
+      return txt ? { comp, txt, lab: this.palierLabelOf(perComposanteCompute[cid], PALIERS) } : null;
+    }).filter(Boolean);
+    if (synthBlocks.length) {
+      body += heading('Synthèse du palier actuel (TPALF)');
+      synthBlocks.forEach(b => {
+        body += p(b.comp.label + ' — ' + b.lab, { bold: true, size: 10.5, spacingAfter: 40 });
+        body += p(b.txt, { size: 10.5, spacingAfter: 120 });
+      });
+    }
+    body += p('', { spacingAfter: 160 });
+
+    body += heading('Attentes ciblées');
+    const periodRows = [['Dates', 'Descripteurs ciblés', "Commentaires / preuves d'apprentissage"]];
+    if (s.periodes.length) {
+      s.periodes.forEach(per => {
+        const comp = COMPOSANTES.find(c => c.id === per.composanteId);
+        const items = this.bankFor(per.composanteId, s.anneeTpalf).filter(i => s.periodeItemSel[`${per.id}|${i.id}`]);
+        periodRows.push([
+          { xml: p(per.dates || '—', { bold: true, size: 10.5, spacingAfter: 0 }) },
+          { xml: (comp ? p(comp.label, { bold: true, size: 10.5, spacingAfter: 40 }) : '') + bulletList(items.map(i => i.text)) },
+          { xml: p(per.commentaires || '—', { size: 10.5, spacingAfter: 0 }) },
+        ]);
+      });
+    } else {
+      // Aucune période saisie manuellement : on génère les attentes par défaut à
+      // partir du prochain palier du continuum pour chaque composante active, afin
+      // que cette section ne reste jamais vide.
+      activeIds.forEach(cid => {
+        const comp = COMPOSANTES.find(c => c.id === cid);
+        const attentes = this.attentesFor(cid);
+        if (!attentes.length) return;
+        const computed = perComposanteCompute[cid];
+        const nextId = this.nextPalierId(computed);
+        const targetLabel = nextId !== null ? this.palierLabelOf(nextId, PALIERS) : this.palierLabelOf(computed, PALIERS);
+        periodRows.push([
+          { xml: p('À déterminer', { bold: true, size: 10.5, spacingAfter: 0 }) },
+          { xml: p(`${comp.label} — vers le ${targetLabel}`, { bold: true, size: 10.5, spacingAfter: 40 }) + bulletList(attentes.map(i => i.text)) },
+          { xml: p('—', { size: 10.5, spacingAfter: 0 }) },
+        ]);
+      });
+    }
+    if (periodRows.length > 1) body += table(periodRows, { header: true, colWidths: [1700, 4870, 3870] }); else body += p('—', { size: 11 });
+    body += p('', { spacingAfter: 160 });
+
+    body += heading('Communication du rendement');
+    body += p('Présentation du plan — Bulletin de progrès : ' + (s.bulletins.map(b => b.label).join(', ') || '—'), { size: 11, spacingAfter: 100 });
+    body += p('Résumé de la rencontre :', { bold: true, size: 11, spacingAfter: 40 });
+    body += p(s.resume || '—', { size: 11, spacingAfter: 140 });
+    body += table([
+      ['Nom et prénom du parent ou tuteur', s.parentNom || '—'],
+      ['Signature du parent', '—'],
+      ['Date', this.fmtDate(s.parentDate) || '—'],
+    ], { colWidths: [3300, 7140] });
+
+    const studentLine = `${s.student.nom || 'Élève'}${s.student.annee ? ' — ' + s.student.annee : ''}${s.student.dateRevision ? ' — rév. ' + this.fmtDate(s.student.dateRevision) : ''}`;
+    const headerCells = [
+      logoBytes ? { xml: imageRun('rIdLogo', 46, 46), shade: 'FFFFFF' } : { xml: p('', { spacingAfter: 0 }), shade: 'FFFFFF' },
+      { xml: p("Plan d'appui temporaire — Francisation", { bold: true, size: 12, color: '2E5C88', spacingAfter: 10 }) + p(studentLine, { size: 9.5, color: '6B7685', spacingAfter: 0 }), shade: 'FFFFFF' },
+    ];
+    const headerXml = table([headerCells], { colWidths: [900, 9540], borders: false, zebra: false }) +
+      `<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="6" w:color="2E5C88"/></w:pBdr><w:spacing w:after="0"/></w:pPr></w:p>`;
+    const footerXml = footerPageNumberXml();
+
+    const blob = buildDocxBlob(body, { headerXml, footerXml, logoBytes });
+    const fname = (s.student.nom || 'eleve').replace(/[^a-z0-9\-_ ]/gi, '').trim().replace(/\s+/g, '_') || 'eleve';
+    downloadBlob(blob, `PAT_${fname}.docx`);
+  }
+
+  renderVals() {
+    if (!this.data) return { student: this.state.student, generating: false, generateLabel: '⬇ Télécharger', generateLabelLong: '⬇ Télécharger le PAT (.docx)', composantesList: [], composantesTabsDiag: [], activeComposante: { palierGroups: [], hasData: false, noData: true, importGroups: [], label: '', pdfLink: '#' }, periodes: [], bulletins: this.state.bulletins, anneesOptions: [], palierInfo: { label: '', explanation: '' }, showPalierInfo: false, steps: [] };
+    const { COMPOSANTES, PALIERS, ANNEES } = this.data;
+    const s = this.state;
+    const stepIdx = STEPS.findIndex(st => st.id === s.step);
+
+    const steps = STEPS.map((st, i) => {
+      const active = st.id === s.step;
+      const done = i < stepIdx;
+      return {
+        id: st.id, label: st.label, num: i + 1,
+        doneMark: done ? '✓' : '',
+        border: active ? 'oklch(0.5 0.1 220)' : 'oklch(0.9 0.01 260)',
+        bg: active ? 'oklch(0.96 0.03 220)' : 'white',
+        numColor: active ? 'oklch(0.5 0.1 220)' : 'oklch(0.6 0.02 260)',
+        textColor: active ? 'oklch(0.35 0.06 220)' : 'oklch(0.4 0.02 260)',
+        onClick: () => this.goStep(st.id),
+      };
+    });
+
+    const composantesList = COMPOSANTES.map(c => ({
+      id: c.id, label: c.label, active: !!s.activeComposantes[c.id],
+      border: s.activeComposantes[c.id] ? 'oklch(0.5 0.1 220)' : 'oklch(0.85 0.01 260)',
+      tabBg: s.activeComposantes[c.id] ? 'oklch(0.96 0.03 220)' : 'white',
+      tabColor: s.activeComposantes[c.id] ? 'oklch(0.35 0.06 220)' : 'oklch(0.4 0.02 260)',
+      onToggleActive: () => this.toggleComposanteActive(c.id),
+    }));
+
+    const activeCompList = COMPOSANTES.filter(c => s.activeComposantes[c.id]);
+    const composantesTabsDiag = activeCompList.map(c => {
+      const defisCount = this.defisFor(c.id).length;
+      return {
+        id: c.id, label: c.label,
+        tabBg: s.tab === c.id ? 'oklch(0.5 0.1 220)' : 'white',
+        tabColor: s.tab === c.id ? 'white' : 'oklch(0.35 0.02 260)',
+        onSelectTab: () => this.selectTab(c.id),
+        hasDefis: defisCount > 0, defisCount,
+        badgeBg: s.tab === c.id ? 'white' : 'oklch(0.65 0.15 55)',
+        badgeColor: s.tab === c.id ? 'oklch(0.5 0.1 220)' : 'white',
+      };
+    });
+
+    const quickSummary = activeCompList.map(c => {
+      const items = this.bankFor(c.id, s.anneeTpalf);
+      const { computed } = this.computePalier(items);
+      const defisCount = this.defisFor(c.id).length;
+      return { id: c.id, label: c.label, palier: this.palierLabelOf(computed, PALIERS), hasDefis: defisCount > 0, defisCount };
+    });
+
+    const compDef = COMPOSANTES.find(c => c.id === s.tab) || COMPOSANTES[0];
+    const bankItems = this.bankFor(compDef.id, s.anneeTpalf);
+    const hasData = bankItems.length > 0;
+    const { computed, ratios } = this.computePalier(bankItems);
+
+    const palierGroups = PALIERS.map((pl, idx) => {
+      const cats = pl.id === 'eveil' ? ['Descripteurs'] : compDef.categories;
+      const r = ratios[pl.id];
+      const pct = r ? Math.round(r.ratio * 100) : 0;
+      return {
+        palierId: pl.id,
+        palierLabel: pl.id === 'eveil' ? compDef.eveilLabel : pl.label,
+        palierSub: pl.sub,
+        open: idx < 2,
+        pct, barColor: pct >= 50 ? 'oklch(0.6 0.15 155)' : 'oklch(0.65 0.14 55)',
+        ratioLabel: r ? `${r.forced}/${r.total}` : '—',
+        onMarkAll: () => this.markAllInPalier(compDef.id, pl.id, true),
+        onClearAll: () => this.markAllInPalier(compDef.id, pl.id, false),
+        categories: cats.map(category => {
+          const items = bankItems.filter(b => String(b.palierId) === String(pl.id) && b.category === category)
+            .map(it => ({
+              id: it.id, text: it.text,
+              force: !!s.sel[it.id]?.force,
+              textColor: s.sel[it.id]?.force ? 'oklch(0.4 0.1 155)' : 'inherit',
+              onToggleForce: () => this.toggleForce(it.id),
+            }));
+          return { category, items };
+        }),
+      };
+    });
+
+    const importGroups = PALIERS.map(pl => {
+      const cats = pl.id === 'eveil' ? ['Descripteurs'] : compDef.categories;
+      return {
+        palierLabel: pl.id === 'eveil' ? compDef.eveilLabel : pl.label,
+        categories: cats.map(category => {
+          const key = this.addValueKey(s.anneeTpalf, s.tab, pl.id, category);
+          return {
+            category,
+            addValue: s.addValues[key] || '',
+            onAddValueChange: (e) => this.handleAddValueChange(key, e.target.value),
+            onAdd: () => this.addDescriptors(pl.id, category),
+          };
+        }),
+      };
+    });
+
+    const activeComposante = {
+      id: compDef.id, label: compDef.label,
+      pdfLink: compDef.pdf[s.anneeTpalf] || Object.values(compDef.pdf)[0] || '#',
+      palierGroups, hasData, noData: !hasData, importGroups,
+    };
+
+    const palierLabelText = this.palierLabelOf(computed, PALIERS);
+    const explLines = PALIER_ORDER.map(pid => {
+      const r = ratios[pid];
+      const label = this.palierLabelOf(pid, PALIERS);
+      if (!r) return `${label} : aucun descripteur chargé encore.`;
+      const status = r.ratio >= 0.8 ? 'atteint' : 'non atteint';
+      return `${label} : ${r.forced}/${r.total} réussis (${Math.round(r.ratio * 100)}%) — ${status} (seuil 80%).`;
+    });
+    const palierInfo = { label: palierLabelText, explanation: `Palier estimé pour ${compDef.label} : ${palierLabelText}.\n\n` + explLines.join('\n') };
+
+    const activeIds = activeCompList.map(c => c.id);
+    const prioriteComposantes = [];
+    const catSet = new Set();
+    const prioriteDetails = [];
+    activeIds.forEach(cid => {
+      const comp = COMPOSANTES.find(c => c.id === cid);
+      const defis = this.defisFor(cid);
+      if (defis.length) {
+        prioriteComposantes.push({ label: comp.label });
+        const items = this.bankFor(cid, s.anneeTpalf);
+        const { computed: cComputed } = this.computePalier(items);
+        const curLabel = this.palierLabelOf(cComputed, PALIERS);
+        const curIdx = PALIER_ORDER.findIndex(p => String(p) === String(cComputed));
+        const nextId = PALIER_ORDER[Math.min(curIdx + 1, PALIER_ORDER.length - 1)];
+        const nextLabel = this.palierLabelOf(nextId, PALIERS);
+        const catsHere = Array.from(new Set(defis.map(i => i.category)));
+        catsHere.forEach(c => catSet.add(c));
+        prioriteDetails.push({
+          id: cid, label: comp.label, curLabel, nextLabel,
+          curSynth: this.synthOf(cid, cComputed), nextSynth: this.synthOf(cid, nextId),
+          hasSynth: !!(this.synthOf(cid, cComputed) || this.synthOf(cid, nextId)),
+          categories: catsHere.map(cat => {
+            const info = this.strategiesModule.getStrategyInfo(cat, s.anneeTpalf);
+            return { category: cat, objectif: info.objectif, strategies: info.strategies };
+          }),
+        });
+      }
+    });
+    const composantesACibler = Array.from(catSet).map(label => ({ label }));
+
+    const composanteOptions = activeIds.map(id => ({ id, label: COMPOSANTES.find(c => c.id === id).label }));
+    const periodes = s.periodes.map(per => {
+      const defis = this.attentesFor(per.composanteId).map(it => ({
+        id: it.id, text: it.text,
+        checked: !!s.periodeItemSel[`${per.id}|${it.id}`],
+        onToggle: () => this.togglePeriodeItem(per.id, it.id),
+      }));
+      return {
+        id: per.id, dates: per.dates, composanteId: per.composanteId, composanteOptions,
+        onDatesChange: (e) => this.updatePeriode(per.id, 'dates', e.target.value),
+        onComposanteChange: (e) => this.updatePeriode(per.id, 'composanteId', e.target.value),
+        onRemove: () => this.removePeriode(per.id),
+        availableItems: defis, hasItems: defis.length > 0, hasNoItems: defis.length === 0,
+        commentaires: per.commentaires, onCommentairesChange: (e) => this.updatePeriode(per.id, 'commentaires', e.target.value),
+      };
+    });
+
+    const bulletins = s.bulletins.map(b => ({ id: b.id, label: b.label, onLabelChange: (e) => this.updateBulletin(b.id, e.target.value), onRemove: () => this.removeBulletin(b.id) }));
+
+    const doGenerate = () => {
+      this.setState({ generating: true });
+      this.generateDocx().finally(() => this.setState({ generating: false }));
+    };
+
+    return {
+      steps, isStepEleve: s.step === 'eleve', isStepDiagnostic: s.step === 'diagnostic', isStepPriorites: s.step === 'priorites', isStepCommunication: s.step === 'communication',
+      hasPrevStep: stepIdx > 0, hasNoPrevStep: stepIdx === 0, hasNextStep: stepIdx < STEPS.length - 1,
+      onPrevStep: () => this.prevStep(), onNextStep: () => this.nextStep(),
+      showQuickSummary: s.step === 'diagnostic' || s.step === 'priorites', quickSummary,
+      student: s.student, onStudentChange: this.handleStudentChange,
+      headerSuffix: (this.state.student && this.state.student.nom) ? ' — ' + this.state.student.nom : '',
+      anneesScolaires: ANNEES_SCOLAIRES, paysListe: PAYS, languesListe: LANGUES,
+      anneeTpalf: s.anneeTpalf, onAnneeTpalfChange: this.handleAnneeTpalfChange, anneesOptions: ANNEES,
+      composantesList, composantesTabsDiag, activeComposante,
+      hasActiveComposantes: activeCompList.length > 0, hasNoActiveComposantes: activeCompList.length === 0,
+      showPalierInfo: s.showPalierInfo, onTogglePalierInfo: () => this.togglePalierInfo(), palierInfo,
+      prioriteComposantes, hasPriorite: prioriteComposantes.length > 0, hasNoPriorite: prioriteComposantes.length === 0,
+      composantesACibler, hasCategories: composantesACibler.length > 0, hasNoCategories: composantesACibler.length === 0,
+      prioriteDetails, hasPrioriteDetails: prioriteDetails.length > 0,
+      periodes, hasNoPeriodes: periodes.length === 0, onAddPeriode: () => this.addPeriode(),
+      bulletins, onAddBulletin: () => this.addBulletin(),
+      resume: s.resume, onResumeChange: (e) => this.persist({ resume: e.target.value }),
+      parentNom: s.parentNom, onParentNomChange: (e) => this.persist({ parentNom: e.target.value }),
+      parentDate: s.parentDate, onParentDateChange: (e) => this.persist({ parentDate: e.target.value }),
+      generating: !!s.generating,
+      generateLabel: s.generating ? '⏳ Génération…' : '⬇ Télécharger',
+      generateLabelLong: s.generating ? '⏳ Génération en cours…' : '⬇ Télécharger le PAT (.docx)',
+      onGenerate: doGenerate, onQuickGenerate: doGenerate,
+      onReset: () => this.reset(),
+    };
+  }
+}
+</script>
+</body>
+</html>
