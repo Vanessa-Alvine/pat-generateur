@@ -5,6 +5,99 @@
 const ALF = 'Curriculum ALF 1re-8e, MÉO 2010';
 const S = (txt, ref) => `${txt} (Source : ${ALF}, ${ref})`;
 
+
+const GL = (txt, ref) => `${txt} (Source : Guide d'enseignement efficace de la lecture, M-3, MÉO 2003, ${ref})`;
+const EVEIL = {
+  communication_orale: {
+    objectif: "Développer la conscience phonologique : entendre, discriminer et produire les sons du français.",
+    jeune: [
+      GL("Jouer quotidiennement avec les sons : comptines, rimes, frapper les syllabes, trouver l'intrus qui ne rime pas", "chapitre « Conscience phonologique »"),
+      GL("Faire discriminer des paires de sons rapprochés ([b]/[p], [f]/[v]) à l'aide d'images et de gestes associés à chaque son", "chapitre « Conscience phonologique »"),
+      S("Modeler l'articulation des sons nouveaux et faire répéter l'élève en petit groupe, sans le corriger devant la classe", "p. 36"),
+    ],
+    ado: [
+      S("Faire écouter et répéter de courts énoncés modèles (enregistrements, lecture à voix haute) en ciblant les sons absents de la langue première", "p. 36"),
+      S("Utiliser des paires minimales et des jeux de discrimination auditive adaptés à l'âge (dictées de sons, applications audio)", "p. 36-37"),
+    ],
+  },
+  lecture: {
+    objectif: "Établir la correspondance entre les sons et les lettres pour amorcer le décodage.",
+    jeune: [
+      GL("Enseigner explicitement les correspondances lettres-sons, quelques-unes à la fois, avec des mots familiers illustrés", "chapitre « Connaissance des lettres et des sons »"),
+      GL("Manipuler des lettres mobiles pour fusionner les sons et former des syllabes, puis des mots simples", "chapitre « Conscience phonologique »"),
+      S("Faire de la lecture partagée de textes courts et répétitifs en pointant les mots", "p. 37"),
+    ],
+    ado: [
+      S("Enseigner les graphèmes du français à partir de mots du vocabulaire scolaire, en les comparant au système d'écriture de la langue première", "p. 37"),
+      S("Offrir des textes courts adaptés à l'âge et au niveau de langue, lus d'abord à voix haute par l'enseignant", "p. 37"),
+    ],
+  },
+  ecriture: {
+    objectif: "Associer les sons entendus aux lettres pour amorcer l'écriture de mots.",
+    jeune: [
+      GL("Faire écrire des mots simples en segmentant les sons à voix haute (écriture approchée), puis comparer avec la norme", "chapitre « Conscience phonologique »"),
+      S("Faire copier et illustrer des mots du mur de mots liés aux thèmes de la classe", "« Bâtir le vocabulaire », p. 37"),
+    ],
+    ado: [
+      S("Faire écrire de courts messages avec banque de mots et modèles de phrases, en ciblant les sons du français", "p. 37"),
+      S("Utiliser la dictée de mots fréquents, suivie d'une correction guidée lettre-son", "p. 37"),
+    ],
+  },
+};
+
+
+// Activités tirées du « Recueil de notions fondamentales de la lecture et de l'écriture, 1re à 4e année »
+// (Whissell-Turner et Provost-Larocque, TC Média Livres / MÉO-FPP, 2025), aligné sur l'attente B2 du programme-cadre de français 2023.
+const RNF = 'Recueil de notions fondamentales, 1re-4e, 2025';
+const R = (txt, ref) => `${txt} (Source : ${RNF}, ${ref})`;
+const RECUEIL = {
+  'Éveil|communication_orale': [
+    R("« Saute-syllabes » : segmenter les mots en syllabes avec un geste moteur (compter sur les doigts, glisser la main le long du bras)", "act. 8, p. 15"),
+    R("« Cache-toi » : isoler le premier, le dernier puis le deuxième son d'un mot prononcé lentement à l'unisson", "act. 10, p. 18"),
+    R("« Parler en robot » : l'élève segmente un mot chuchoté en sons pour le faire deviner au groupe", "act. 16, p. 21"),
+  ],
+  'Éveil|lecture': [
+    R("« Les petites voitures » ou « Les boules de syllabes » : fusionner deux sons ou deux syllabes en déplaçant des objets de gauche à droite", "act. 5 et 12, p. 13 et 19"),
+    R("« J'ai, qui a ? » : jeu en chaîne pour nommer les lettres et leur son à partir d'images du mur de sons", "Connaissance des lettres, act. 3, p. 31"),
+    R("« Les dominos » : associer majuscules et minuscules", "Connaissance des lettres, act. 4, p. 32"),
+  ],
+  'Éveil|ecriture': [
+    R("« Boîtes Elkonin » : faire un point dans une case pour chaque son entendu dans un mot dicté, puis écrire les lettres", "act. 18, p. 21"),
+    R("« Tracé multisensoriel » : tracer les lettres dans le sable, la farine, la pâte à modeler ou au doigt", "Connaissance des lettres, act. 5, p. 33"),
+  ],
+  'Reconnaissance des mots, décodage et fluidité': [
+    R("« On remet de l'ordre » : découper et réassembler des mots de deux syllabes contenant la correspondance graphème-phonème ciblée", "CGP, act. 4, p. 46"),
+    R("« Bingo auto-construit » : l'élève remplit sa carte avec des syllabes ciblées, puis les lit en dyade", "CGP, act. 5, p. 47"),
+    R("« Marelle des mots fréquents » et « Cherche le mot » : automatiser la lecture des mots fréquents par le jeu", "Fluidité, act. 1-2, p. 93"),
+    R("« La phrase qui allonge » : lire par groupes de mots en allongeant une phrase simple au tableau", "Fluidité, act. 6, p. 96"),
+    R("« Théâtre de lecteurs » : relectures répétées d'un texte en équipe pour travailler précision, rythme et expression", "Fluidité, act. 7, p. 97"),
+  ],
+  'Orthographe lexicale': [
+    R("« Détective de la régularité » : observer deux listes de mots classés et formuler la règle (p. ex., m devant m, b, p)", "Régularités, act. 1, p. 63"),
+    R("« Découvre la règle » / « Dur ou doux ? » : classer des mots selon le c et le g durs ou doux", "CGP, act. 6-7, p. 49"),
+    R("« Dictée métacognitive » : dicter une phrase, puis faire verbaliser les choix orthographiques; pratique quotidienne encouragée", "Régularités, act. 4, p. 64"),
+    R("« Les consonnes muettes finales » : trouver la lettre muette grâce à un mot de même famille (p. ex., grand → grande)", "Morphologie, act. 6, p. 70"),
+  ],
+  'Lexique': [
+    R("« Même les mots ont une famille » : construire des familles de mots à partir d'une base commune", "Morphologie, act. 1, p. 68"),
+    R("« Observer le contexte à la loupe » puis « le mot à la loupe » : déduire le sens d'un mot inconnu par les indices du contexte et des morphèmes", "Vocabulaire, act. 1-2, p. 84-85"),
+    R("« Notre mur de nouveaux mots » : l'élève présente au groupe un mot découvert en lecture et la stratégie utilisée", "Vocabulaire, act. 4, p. 86"),
+    R("« Un mot, plusieurs sens » : explorer les sens d'un mot polysémique à l'aide d'images", "Vocabulaire, act. 7, p. 88"),
+  ],
+  'Élocution (voix et prosodie)': [
+    R("« Change de ton ! » : lire une même phrase avec l'intonation du point, du point d'interrogation ou d'exclamation pigé", "Fluidité, act. 5, p. 95"),
+    R("« Une lecture enregistrée » : s'exercer à lire un livre, puis l'enregistrer pour des plus jeunes", "Fluidité, act. 3, p. 93"),
+  ],
+  'Morphosyntaxe': [
+    R("« À la recherche des terminaisons muettes » : repérer dans un texte les terminaisons verbales qu'on n'entend pas (ils mangent)", "CGP, act. 10, p. 53"),
+    R("« Complète la phrase » : choisir le mot dérivé qui convient à la structure de la phrase", "Morphologie, act. 10, p. 77"),
+  ],
+  'Organisation du texte': [
+    R("« Les champs lexicaux » : dresser un réseau de mots avant d'écrire pour activer les connaissances et éviter la page blanche", "Vocabulaire, act. 5, p. 87"),
+  ],
+};
+const interleave = (a, b) => { const out = []; for (let i = 0; i < Math.max(a.length, b.length); i++) { if (a[i]) out.push(a[i]); if (b[i]) out.push(b[i]); } return out; };
+
 export const STRATEGIES = {
   'Élocution (voix et prosodie)': {
     objectif: "Améliorer la prononciation, le débit et l'intonation à l'oral.",
@@ -128,9 +221,12 @@ export const STRATEGIES = {
 
 const TIER_BY_ANNEE = { primaire: 'jeune', moyen: 'jeune', intermediaire: 'ado', secondaire: 'ado' };
 
-export function getStrategyInfo(category, anneeTpalf) {
-  const entry = STRATEGIES[category];
+export function getStrategyInfo(category, anneeTpalf, composanteId) {
+  const entry = (category === 'Descripteurs' && EVEIL[composanteId]) ? EVEIL[composanteId] : STRATEGIES[category];
   if (!entry) return { objectif: '', strategies: [] };
   const tier = TIER_BY_ANNEE[anneeTpalf] || 'jeune';
-  return { objectif: entry.objectif, strategies: entry[tier] || entry.jeune || [] };
+  const base = entry[tier] || entry.jeune || [];
+  const rKey = category === 'Descripteurs' ? 'Éveil|' + composanteId : category;
+  const extra = (anneeTpalf === 'primaire' || anneeTpalf === 'moyen' || !anneeTpalf) ? (RECUEIL[rKey] || []) : [];
+  return { objectif: entry.objectif, strategies: interleave(base, extra) };
 }
